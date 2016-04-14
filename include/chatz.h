@@ -1,4 +1,4 @@
-#ifdef __CHATZ_H
+#ifndef __CHATZ_H
 #define __CHATZ_H
 
 #include <stdlib.h>

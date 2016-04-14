@@ -19,6 +19,9 @@
  ******************************************************************************
  */
 
+#include "../include/chatz.h"
+#include "../include/networking.h"
+
 static int _sndlock;
 
 int setup_sock(const char *host, int port)
