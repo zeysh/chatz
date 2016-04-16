@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <gtk/gtk.h>
 
 /* #define DEBUG */
 #define ERROR   1

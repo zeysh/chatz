@@ -22,19 +22,34 @@
 #include "../include/chatz.h"
 #include "../include/networking.h"
 
-static void actviate(GtkApplication *app, gpointer user_data)
+static void print_hello (GtkWidget *widget, gpointer data)
+{
+    g_print("Hello World\n");
+}
+
+static void activate(GtkApplication *app, gpointer user_data)
 {
     GtkWidget *window;
+    GtkWidget *button;
+    GtkWidget *button_box;
 
     window = gtk_application_window_new(app);
-    gtk_window_set_title (GTK_WINDOW(window), "Chatz");
-    gtk_window_set_default_size(GTK_WINDOW(window), 800, 400);
+    gtk_window_set_title(GTK_WINDOW(window), "Chatz");
+    gtk_window_set_default_size(GTK_WINDOW(window), 600, 800);
+
+    button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_container_add(GTK_CONTAINER(window), button_box);
+
+    button = gtk_button_new_with_label("Connect");
+    g_signal_connect(button, "Connected", G_CALLBACK(print_hello), NULL);
+    g_signal_connect_swapped(button, "Connected", G_CALLBACK(gtk_widget_destroy), window);
+    gtk_container_add(GTK_CONTAINER(button_box), button);
     gtk_widget_show_all(window);
 }
 
 int main (int argc, char **argv)
 {
-    GTKApplication *app;
+    GtkApplication *app;
     int status;
 
     app = gtk_application_new("chatz", G_APPLICATION_FLAGS_NONE);

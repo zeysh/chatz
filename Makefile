@@ -2,7 +2,7 @@ CC = gcc
 BIN = bin
 INSTALL = /usr/bin
 CFLAGS = -std=gnu99 -W -Wall
-GTKFLAGS=-export-dynamic `pkg-config --cflags --libs gtk+-3.0`
+GTKFLAGS=`pkg-config --cflags --libs gtk+-3.0`
 SRC = src/main.c \
       src/networking.c
 
