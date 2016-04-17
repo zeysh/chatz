@@ -30,7 +30,7 @@ int main (int argc, char **argv)
     gtk_init (&argc, &argv);
     builder = gtk_builder_new();
     gtk_builder_add_from_file (builder, "ui/chatz.ui", NULL);
-    window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
+    window = GTK_WIDGET(gtk_builder_get_object(builder, "winmain"));
     g_object_unref(G_OBJECT(builder));
     gtk_widget_show(window);
     gtk_main();
