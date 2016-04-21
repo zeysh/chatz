@@ -13,6 +13,8 @@
 
 #define BUFLEN 4096
 
+#define LOGFILE "chatz.log"
+
 int _continue;
 
 #endif

@@ -2,9 +2,13 @@ CC = gcc
 BIN = bin
 INSTALL = /usr/bin
 CFLAGS = -std=gnu99 -W -Wall
+LIBS = -lsqlite3
 GTKFLAGS=`pkg-config --cflags --libs gtk+-3.0`
 SRC = src/main.c \
-      src/networking.c
+      src/networking.c \
+      src/servers.c \
+      src/database.c \
+      src/log.c
 
 all: chatz
 
