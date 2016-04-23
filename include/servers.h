@@ -18,4 +18,6 @@ int create_server (struct ircserver *newinfo);
 int update_server (int sid, struct ircserver *newinfo);
 int destroy_server (int sid);
 
+struct ircserver *_servers;
+
 #endif

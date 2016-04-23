@@ -66,11 +66,11 @@ int create_tables(void)
    return status;
 }
 
-int query_servers(struct ircserver *servers)
+int query_servers(void)
 {
     char *sql;
     sqlite3_stmt *stmt;
-    int rc;
+    int rc, rows = -1;
 
     sql = sqlite3_mprintf("SELECT * FROM servers");
     rc = sqlite3_prepare_v2(_db, sql, strlen(sql) + 1, &stmt, NULL);
@@ -80,13 +80,25 @@ int query_servers(struct ircserver *servers)
         return ERROR;
     }
 
+    rc = sqlite3_step(stmt);
+    if (rc == SQLITE_ERROR)
+    {
+        log_event(LOGFILE, "Error retrieving servers from database");
+        return ERROR;
+    }
+
+    rows = sqlite3_column_int(stmt, 0);
+    _servers = (struct ircserver *)malloc(sizeof(struct ircserver) * rows);
+
     do
     {
-        rc = sqlite3_step(stmt);
         if (rc == SQLITE_ROW)
         {
-            /* set IRC server parameters */
+            /*  set IRC params */
+            printf("%s\n", (const char *)sqlite3_column_text(stmt, 1));
         }
+        
+        rc = sqlite3_step(stmt);
     } while (rc == SQLITE_ROW);
 
     sqlite3_free(sql);

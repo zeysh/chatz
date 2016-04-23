@@ -6,6 +6,6 @@
 
 int init_database (char *path);
 int create_tables (void);
-int query_servers (struct ircserver *servers);
+int query_servers (void);
 
 #endif
