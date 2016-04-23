@@ -24,23 +24,25 @@
 #include "../include/log.h"
 #include "../include/servers.h"
 
-int init_database(char *path, sqlite3 *db)
+static sqlite3 *_db;
+
+int init_database(char *path)
 {
     int status;
-    status = sqlite3_open(path, &db);
+    status = sqlite3_open(path, &_db);
     if (status != SUCCESS)
     {
         log_event(LOGFILE, "failed to initialize database");
-        sqlite3_close(db);
+        sqlite3_close(_db);
     }
 
     return status;
 }
 
-int create_tables(sqlite3 *db)
+int create_tables(void)
 {
     char *errmsg;
-    int  rc;
+    int  rc, status;
     char *sql;
 
     sql = "CREATE TABLE servers(" \
@@ -52,24 +54,26 @@ int create_tables(sqlite3 *db)
           "PASSWD CHAR(64)," \
           "SSL INT NOT NULL);";
 
-    rc = sqlite3_exec(db, sql, NULL, 0, &errmsg)
+    rc = sqlite3_exec(_db, sql, NULL, 0, &errmsg);
     if (rc != SQLITE_OK)
-        log_event(LOGFILE, "failed to create database table 'servers'")
-        sqlite3_free(zErrMsg);
+    {
+        log_event(LOGFILE, "failed to create database table 'servers'");
+        sqlite3_free(errmsg);
+        status = ERROR;
     }
 
-   sqlite3_close(db);
-   return SUCCESS;
+   sqlite3_close(_db);
+   return status;
 }
 
-int query_servers(struct ircserver *servers, sqlite3 *db)
+int query_servers(struct ircserver *servers)
 {
     char *sql;
     sqlite3_stmt *stmt;
     int rc;
 
     sql = sqlite3_mprintf("SELECT * FROM servers");
-    rc = sqlite3_prepare_v2(db, sql, strlen(sql) + 1, %stmt, NULL);
+    rc = sqlite3_prepare_v2(_db, sql, strlen(sql) + 1, &stmt, NULL);
     if (rc != SQLITE_OK)
     {
         log_event(LOGFILE, "Failed to retrieve server listing from database");
@@ -85,6 +89,6 @@ int query_servers(struct ircserver *servers, sqlite3 *db)
         }
     } while (rc == SQLITE_ROW);
 
-    sqlite3_free(sql)
+    sqlite3_free(sql);
     return SUCCESS;
 }

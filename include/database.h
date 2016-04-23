@@ -2,8 +2,10 @@
 #define _DATABASE_H
 
 #include <sqlite3.h>
+#include "servers.h"
 
-int init_database (char *path, sqlite3 *db);
-int query_servers (struct ircserver *servers, sqlite3 *db);
+int init_database (char *path);
+int create_tables (void);
+int query_servers (struct ircserver *servers);
 
 #endif

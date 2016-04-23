@@ -21,11 +21,34 @@
 
 #include "../include/chatz.h"
 #include "../include/networking.h"
+#include "../include/database.h"
+#include "../include/servers.h"
+
+int init_application(void)
+{
+    int dbexists = 0;
+    if (access(DBFILE, F_OK) != -1)
+        dbexists = 1;
+
+    if (init_database(DBFILE) != SUCCESS)
+        return ERROR;
+
+    if (!dbexists)
+    {
+        if (create_tables() != SUCCESS)
+            return ERROR;
+    }
+
+    return SUCCESS;
+}
 
 int main (int argc, char **argv)
 {
     GtkBuilder *builder;
     GtkWidget *window;
+
+    /* setup database if doesn't exist and get stored info */
+    init_application();
 
     gtk_init (&argc, &argv);
     builder = gtk_builder_new();

@@ -19,6 +19,9 @@
  ******************************************************************************
  */
 
+#include "../include/chatz.h"
+#include "../include/log.h"
+
 void log_event(const char *filename, const char *message)
 {
     FILE *f;

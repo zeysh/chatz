@@ -14,6 +14,7 @@
 #define BUFLEN 4096
 
 #define LOGFILE "chatz.log"
+#define DBFILE "chatz.db"
 
 int _continue;
 
