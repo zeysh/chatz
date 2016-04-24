@@ -26,7 +26,8 @@
 
 int init_application(void)
 {
-    int dbexists = 0;
+    int dbexists = 0
+        ;
     if (access(DBFILE, F_OK) != -1)
         dbexists = 1;
 
@@ -37,6 +38,12 @@ int init_application(void)
     {
         if (create_tables() != SUCCESS)
             return ERROR;
+    }
+
+    if (query_servers() != SUCCESS)
+    {
+        destroy_servers();
+        return ERROR;
     }
 
     return SUCCESS;

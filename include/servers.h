@@ -6,18 +6,18 @@
 struct ircserver
 {
     int sid;
-    char nick[PARAMLEN];
-    char user[PARAMLEN];
     char host[PARAMLEN];
     int port;
     char passwd[PARAMLEN];
     int ssl;
 };
 
+void destroy_servers (void);
 int create_server (struct ircserver *newinfo);
 int update_server (int sid, struct ircserver *newinfo);
-int destroy_server (int sid);
+int delete_server (int sid);
 
+int _nservs;
 struct ircserver *_servers;
 
 #endif

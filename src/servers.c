@@ -23,6 +23,12 @@
 #include "../include/servers.h"
 #include "../include/database.h"
 
+void destroy_servers(void)
+{
+    free(_servers);
+    _servers = NULL;
+}
+
 int create_server(struct ircserver *newinfo)
 {
     return SUCCESS;
@@ -33,7 +39,7 @@ int update_server(int sid, struct ircserver *newinfo)
     return SUCCESS;
 }
 
-int destroy_server(int sid)
+int delete_server(int sid)
 {
     return SUCCESS;
 }

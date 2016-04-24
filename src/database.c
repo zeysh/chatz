@@ -155,19 +155,37 @@ int create_tables(void)
     }
 
     insert_chatz_user();
+    return SUCCESS;
+}
 
-    sqlite3_close(_db);
+int query_users(void)
+{
+    char *sql;
+    sqlite3_stmt *stmt;
+    int rc, i = 0;
+
+    sql = "SELECT * FROM users";
+    rc = sqlite3_prepare_v2(_db, sql, -1, &stmt, 0);
+    if (rc != SQLITE_OK)
+    {
+        log_event(LOGFILE, "Failed to retrieve channel listing from database");
+        return ERROR;
+    }
+
+    /* TODO: logic to cache users */
+
     return SUCCESS;
 }
 
 int query_servers(void)
 {
     char *sql;
+    const char *ptr;
     sqlite3_stmt *stmt;
-    int rc, rows = -1;
+    int rc, i = 0;
 
-    sql = sqlite3_mprintf("SELECT * FROM servers");
-    rc = sqlite3_prepare_v2(_db, sql, strlen(sql) + 1, &stmt, NULL);
+    sql = "SELECT * FROM servers";
+    rc = sqlite3_prepare_v2(_db, sql, -1, &stmt, 0);
     if (rc != SQLITE_OK)
     {
         log_event(LOGFILE, "Failed to retrieve server listing from database");
@@ -181,20 +199,25 @@ int query_servers(void)
         return ERROR;
     }
 
-    rows = sqlite3_column_int(stmt, 0);
-    _servers = (struct ircserver *)malloc(sizeof(struct ircserver) * rows);
+    _nservs  = sqlite3_column_int(stmt, 0);
+    _servers = (struct ircserver *)malloc(sizeof(struct ircserver) * _nservs);
 
+    /*  iterate rows and set irc servers */
     do
     {
         if (rc == SQLITE_ROW)
         {
-            /*  set IRC params */
-            printf("%s\n", (const char *)sqlite3_column_text(stmt, 1));
+            _servers[i].sid = (int)sqlite3_column_int(stmt, 0);
+            strncpy(_servers[i].host, (const char *)sqlite3_column_text(stmt, 1), PARAMLEN - 1);
+            _servers[i].port = (int)sqlite3_column_int(stmt, 2);
+            ptr = (const char *)sqlite3_column_text(stmt, 3);
+            if (ptr != NULL)
+                strncpy(_servers[i].passwd, ptr, PARAMLEN - 1);
+            _servers[i].ssl = (int)sqlite3_column_int(stmt, 4);
         }
 
         rc = sqlite3_step(stmt);
     } while (rc == SQLITE_ROW);
 
-    sqlite3_free(sql);
     return SUCCESS;
 }
