@@ -29,6 +29,7 @@ static sqlite3 *_db;
 int init_database(char *path)
 {
     int status;
+
     status = sqlite3_open(path, &_db);
     if (status != SUCCESS)
     {
@@ -39,31 +40,124 @@ int init_database(char *path)
     return status;
 }
 
-int create_tables(void)
+static int insert_chatz_serv(void)
 {
-    char *errmsg;
-    int  rc, status;
-    char *sql;
+    char *errmsg, *sql;
+    int rc;
 
-    sql = "CREATE TABLE servers(" \
-          "SID INT PRIMARY KEY NOT NULL," \
-          "NICK CHAR(128)," \
-          "USER CHAR(128)," \
-          "HOST CHAR(32), " \
-          "PORT INT NOT NULL," \
-          "PASSWD CHAR(64)," \
-          "SSL INT NOT NULL);";
+    sql = "INSERT INTO servers (host, port, ssl) " \
+          "VALUES ('74.140.209.140', 6697, 0);";
 
     rc = sqlite3_exec(_db, sql, NULL, 0, &errmsg);
     if (rc != SQLITE_OK)
     {
-        log_event(LOGFILE, "failed to create database table 'servers'");
-        sqlite3_free(errmsg);
-        status = ERROR;
+        log_event(LOGFILE, "Failed to insert chatz server info");
+        log_event(LOGFILE, errmsg);
+        return ERROR;
     }
 
-   sqlite3_close(_db);
-   return status;
+    return SUCCESS;
+}
+
+static int insert_chatz_chan(void)
+{
+    char *errmsg, *sql;
+    int rc;
+
+    sql = "INSERT INTO channels (sid, channel) " \
+          "VALUES (1, '#chatz');";
+
+    rc = sqlite3_exec(_db, sql, NULL, 0, &errmsg);
+    if (rc != SQLITE_OK)
+    {
+        log_event(LOGFILE, "Failed to insert chatz channel info into database");
+        log_event(LOGFILE, errmsg);
+        return ERROR;
+    }
+
+    return SUCCESS;
+}
+
+static int insert_chatz_user(void)
+{
+    char *errmsg, *sql;
+    int rc;
+
+    sql = "INSERT INTO users (sid, user, nick) " \
+          "VALUES (1, 'chatzirc', 'chatzuser');";
+
+    rc = sqlite3_exec(_db, sql, NULL, 0, &errmsg);
+    if (rc != SQLITE_OK)
+    {
+        log_event(LOGFILE, "Failed to insert chatz user info into database");
+        log_event(LOGFILE, errmsg);
+        return ERROR;
+    }
+
+    return SUCCESS;
+}
+
+int create_tables(void)
+{
+    char *errmsg, *sql;
+    int  rc;
+
+    sql = "CREATE TABLE servers(" \
+          "id INTEGER PRIMARY KEY AUTOINCREMENT," \
+          "host CHAR(32), " \
+          "port INT NOT NULL," \
+          "passwd CHAR(64)," \
+          "ssl INT NOT NULL);";
+
+    rc = sqlite3_exec(_db, sql, NULL, 0, &errmsg);
+    if (rc != SQLITE_OK)
+    {
+        log_event(LOGFILE, "Failed to create database table 'servers'");
+        log_event(LOGFILE, errmsg);
+        sqlite3_free(errmsg);
+        sqlite3_close(_db);
+        return ERROR;
+    }
+
+    insert_chatz_serv();
+
+    sql = "CREATE TABLE channels(" \
+          "id INTEGER PRIMARY KEY AUTOINCREMENT," \
+          "sid INT NOT NULL," \
+          "channel CHAR(64));";
+
+    rc = sqlite3_exec(_db, sql, NULL, 0, &errmsg);
+    if (rc != SQLITE_OK)
+    {
+        log_event(LOGFILE, "Failed to create database table 'channels'");
+        log_event(LOGFILE, errmsg);
+        sqlite3_free(errmsg);
+        sqlite3_close(_db);
+        return ERROR;
+    }
+
+    insert_chatz_chan();
+
+    sql = "CREATE TABLE users(" \
+          "id INTEGER PRIMARY KEY AUTOINCREMENT," \
+          "sid INT NOT NULL," \
+          "user CHAR(64) NOT NULL, " \
+          "nick CHAR(64) NOT NULL);";
+
+    rc = sqlite3_exec(_db, sql, NULL, 0, &errmsg);
+    if (rc != SQLITE_OK)
+    {
+        log_event(LOGFILE, "Failed to create database table 'users'");
+        log_event(LOGFILE, errmsg);
+        sqlite3_free(errmsg);
+        sqlite3_close(_db);
+        return ERROR;
+    }
+
+    insert_chatz_user();
+
+    sqlite3_close(_db);
+    return SUCCESS;
 }
 
 int query_servers(void)
@@ -97,7 +191,7 @@ int query_servers(void)
             /*  set IRC params */
             printf("%s\n", (const char *)sqlite3_column_text(stmt, 1));
         }
-        
+
         rc = sqlite3_step(stmt);
     } while (rc == SQLITE_ROW);
 
