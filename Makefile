@@ -8,7 +8,8 @@ SRC = src/main.c \
       src/networking.c \
       src/servers.c \
       src/database.c \
-      src/log.c
+      src/log.c \
+	  src/app.c
 
 all: chatz
 

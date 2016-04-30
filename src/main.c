@@ -20,14 +20,13 @@
  */
 
 #include "../include/chatz.h"
-#include "../include/networking.h"
+#include "../include/app.h"
 #include "../include/database.h"
-#include "../include/servers.h"
 
 int init_application(void)
 {
-    int dbexists = 0
-        ;
+    int dbexists = 0;
+
     if (access(DBFILE, F_OK) != -1)
         dbexists = 1;
 
@@ -51,19 +50,5 @@ int init_application(void)
 
 int main (int argc, char **argv)
 {
-    GtkBuilder *builder;
-    GtkWidget *window;
-
-    /* setup database if doesn't exist and get stored info */
-    init_application();
-
-    gtk_init (&argc, &argv);
-    builder = gtk_builder_new();
-    gtk_builder_add_from_file (builder, "ui/chatz.ui", NULL);
-    window = GTK_WIDGET(gtk_builder_get_object(builder, "winmain"));
-    g_object_unref(G_OBJECT(builder));
-    gtk_widget_show(window);
-    gtk_main();
-
-    return SUCCESS;
+  return g_application_run(G_APPLICATION(chatz_new()), argc, argv);
 }

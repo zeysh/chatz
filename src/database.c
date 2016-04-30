@@ -162,7 +162,7 @@ int query_users(void)
 {
     char *sql;
     sqlite3_stmt *stmt;
-    int rc, i = 0;
+    int rc;
 
     sql = "SELECT * FROM users";
     rc = sqlite3_prepare_v2(_db, sql, -1, &stmt, 0);
