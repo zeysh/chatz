@@ -26,18 +26,15 @@
 
 static sqlite3 *_db;
 
-int init_database(char *path)
+void init_database(char *path)
 {
     int status;
 
-    status = sqlite3_open(path, &_db);
-    if (status != SUCCESS)
+    if (sqlite3_open(path, &_db) != SUCCESS)
     {
         log_event(LOGFILE, "failed to initialize database");
         sqlite3_close(_db);
     }
-
-    return status;
 }
 
 static int insert_chatz_serv(void)

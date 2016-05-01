@@ -4,7 +4,7 @@
 #include <sqlite3.h>
 #include "servers.h"
 
-int init_database (char *path);
+void init_database (char *path);
 int create_tables (void);
 int query_servers (void);
 int query_users (void);
