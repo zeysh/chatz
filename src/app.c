@@ -32,6 +32,9 @@ static void chatz_activate(GApplication *app)
 {
     ChatzWindow *win;
     win = chatz_window_new(CHATZ_APP(app));
+    gtk_window_set_title(GTK_WINDOW(win), "Chatz");
+    gtk_window_set_default_size(GTK_WINDOW(win), 800, 600);
+    gtk_container_set_border_width(GTK_CONTAINER(win), 10);
     gtk_window_present(GTK_WINDOW(win));
 }
 
