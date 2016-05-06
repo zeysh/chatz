@@ -17,9 +17,13 @@ G_DEFINE_TYPE(ChatzApp, chatz, GTK_TYPE_APPLICATION);
 static void chatz_init(struct _ChatzApp *app)
 {
     int dbexists = 0;
+    FILE *fp;
 
-    if (access(DBFILE, F_OK) != -1)
+    if (fp = fopen(DBFILE, "r"))
+    {
         dbexists = 1;
+        fclose(fp);
+    }
 
     init_database(DBFILE);
     if (!dbexists)
@@ -31,11 +35,26 @@ static void chatz_init(struct _ChatzApp *app)
 static void chatz_activate(GApplication *app)
 {
     ChatzWindow *win;
+    GtkWidget *grid;
+    GtkWidget *sendbtn;
+
+    /* create window */
     win = chatz_window_new(CHATZ_APP(app));
+    gtk_container_set_border_width(GTK_CONTAINER(win), 10);
     gtk_window_set_title(GTK_WINDOW(win), "Chatz");
     gtk_window_set_default_size(GTK_WINDOW(win), 800, 600);
     gtk_container_set_border_width(GTK_CONTAINER(win), 10);
-    gtk_window_present(GTK_WINDOW(win));
+    gtk_window_set_position(GTK_WINDOW(win), GTK_WIN_POS_CENTER);
+
+    /* create grid */
+    grid = gtk_grid_new();
+    gtk_container_add(GTK_CONTAINER(win), grid);
+
+    /* create send button */
+    sendbtn = gtk_button_new_with_label("Send");
+    gtk_widget_set_tooltip_text(sendbtn, "Send a message");
+    gtk_grid_attach(GTK_GRID(grid), sendbtn, 0, 0, 1, 1);
+    gtk_widget_show_all(GTK_WIDGET(win));
 }
 
 static void chatz_open(GApplication *app, GFile **files,
