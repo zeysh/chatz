@@ -68,32 +68,32 @@ static void chatz_activate(GApplication *app)
     gtk_window_set_default_size(GTK_WINDOW(win), 800, 600);
     gtk_window_set_position(GTK_WINDOW(win), GTK_WIN_POS_CENTER);
 
-    /* create grid */
+    /* create grid for sending messages */
     grid = gtk_grid_new();
     gtk_container_add(GTK_CONTAINER(win), grid);
 
     /* create send button */
     sendbtn = gtk_button_new_with_label("Send");
     gtk_widget_set_tooltip_text(sendbtn, "Send a message");
-    gtk_grid_attach(GTK_GRID(grid), sendbtn, 0, 4, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), sendbtn, 9, 0, 1, 1);
 
     /* create message/entry box */
     entry = gtk_entry_new();
     gtk_widget_set_hexpand(entry, TRUE);
     /* HORIZ SLOT, VERT SLOT, HORIZ CELL,  VERT CELL */
-    gtk_grid_attach(GTK_GRID(grid), entry, 2, 4, 1, 1);
-
-    /* create message viewer */
-    view = gtk_text_view_new();
-    gtk_widget_set_vexpand(view, TRUE);
-    gtk_grid_attach(GTK_GRID(grid), view, 1, 1, 2, 3);
+    gtk_grid_attach(GTK_GRID(grid), entry, 10, 0, 23, 1);
 
     /* create channel viewer */
     view = gtk_tree_view_new();
-    gtk_widget_set_vexpand(view, TRUE);
     gtk_widget_set_hexpand(view, TRUE);
-    gtk_grid_attach(GTK_GRID(grid), view, 0, 0, 1, 4);
+    gtk_widget_set_vexpand(view, TRUE);
+    gtk_grid_attach(GTK_GRID(grid), view, 0, 2, 8, 16);
 
+    /* create message viewer */
+    view = gtk_text_view_new();
+    gtk_widget_set_hexpand(view, TRUE);
+    gtk_widget_set_vexpand(view, TRUE);
+    gtk_grid_attach(GTK_GRID(grid), view, 9, 2, 24, 16);
     gtk_widget_show_all(GTK_WIDGET(win));
 }
 
