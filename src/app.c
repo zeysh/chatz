@@ -53,6 +53,33 @@ static void chatz_init(struct _ChatzApp *app)
     query_servers();
 }
 
+void init_list(GtkWidget *list, const char *title)
+{
+    GtkCellRenderer *renderer;
+    GtkTreeViewColumn *column;
+    GtkListStore *store;
+
+    renderer = gtk_cell_renderer_text_new();
+    column = gtk_tree_view_column_new_with_attributes(title,
+            renderer, "text", 0, NULL);
+
+    gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
+    store = gtk_list_store_new(1, G_TYPE_STRING);
+
+    gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(store));
+    g_object_unref(store);
+}
+
+void populate_channel_list(GtkWidget *list)
+{
+    GtkListStore *store;
+    GtkTreeIter *iter;
+
+    gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(store));
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "TEST", -1);
+}
+
 static void chatz_activate(GApplication *app)
 {
     ChatzWindow *win;
@@ -71,20 +98,22 @@ static void chatz_activate(GApplication *app)
     /* create grid for sending messages */
     grid = gtk_grid_new();
     gtk_grid_set_row_spacing(grid, 10);
-    gtk_grid_set_column_spacing(grid, 10);
-    gtk_grid_set_row_homogeneous(grid, TRUE);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
     gtk_container_add(GTK_CONTAINER(win), grid);
 
-    /* create channel viewer */
+    /* create channel viewer and list store */
     view = gtk_tree_view_new();
     gtk_widget_set_vexpand(view, TRUE);
     gtk_grid_attach(GTK_GRID(grid), view, 0, 1, 8, 8);
+    init_list(view, "Channels");
 
     /* create friend viewer */
     view = gtk_tree_view_new();
     gtk_widget_set_hexpand(view, TRUE);
     gtk_widget_set_vexpand(view, TRUE);
     gtk_grid_attach(GTK_GRID(grid), view, 0, 9, 8, 5);
+    init_list(view, "Friends");
 
     /* create message viewer */
     view = gtk_text_view_new();
