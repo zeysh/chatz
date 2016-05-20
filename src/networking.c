@@ -22,28 +22,49 @@
 #include "../include/chatz.h"
 #include "../include/networking.h"
 
-static int _sndlock;
+static pthread_mutex_t _sndlock;
 
-int setup_sock(const char *host, int port)
+int sock_open(const char *host, int port)
 {
-    _sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (_sock < 0)
-        return ERROR;
+    int fd;
+    char *ip;
+    struct hostent *he;
+    struct in_addr **addrs;
+    struct sockaddr_in server;
 
-    _sin.sin_addr.s_addr = inet_addr(host);
-    _sin.sin_family      = AF_INET;
-    _sin.sin_port        = htons(port);
+    /* Resolve DNS if host is not an IP address */
+    if ((he = gethostbyname(host)) == NULL)
+        return -1;
 
-    return SUCCESS;
+    addrs = (struct in_addr **)he->h_addr_list;
+    ip = inet_ntoa(*addrs[0]);
+
+    /* Establish connection */
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (fd == -1)
+        return -1;
+
+    server.sin_addr.s_addr = inet_addr(ip);
+    server.sin_family = AF_INET;
+    server.sin_port = htons(port);
+
+    if (connect(fd, (struct sockaddr *)&server, sizeof(server)) < 0)
+    {
+        close(fd);
+        return -1;
+    }
+
+    return fd;
 }
 
-int tcp_connect(void)
-{
-    if (connect(_sock, (struct sockaddr *)&_sin, sizeof(_sin)) < 0)
-        return ERROR;
 
-    return SUCCESS;
-}
+
+
+
+
+
+
 
 int tcp_send(const char *msg, size_t nb)
 {
