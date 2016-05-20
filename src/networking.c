@@ -75,20 +75,12 @@ ssize_t sock_send(int fd, const char *buff)
     return ret;
 }
 
-
-
-
-
-
-
-
-
-int tcp_recv(char *buffer)
+ssize_t sock_recv(int fd, char *buff)
 {
-    int nb;
+    ssize_t nb;
 
-    if ((nb = read(_sock, buffer, BUFLEN - 1)) > 0)
-        buffer[nb] = '\0';
+    if ((nb = read(fd, buff, BUFLEN - 1)) > 0)
+        buff[nb] = '\0';
 
     return nb;
 }
