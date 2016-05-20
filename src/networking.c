@@ -58,6 +58,11 @@ int sock_open(const char *host, int port)
     return fd;
 }
 
+void sock_close(int fd)
+{
+    close(fd);
+}
+
 
 
 
