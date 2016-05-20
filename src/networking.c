@@ -64,29 +64,24 @@ void sock_close(int fd)
     close(fd);
 }
 
-
-
-
-
-
-
-
-
-int tcp_send(const char *msg, size_t nb)
+ssize_t sock_send(int fd, const char *buff)
 {
-    while (_sndlock == 1)
-        sleep(1);
+    ssize_t ret;
 
-    _sndlock = 1;
-    if (send(_sock, msg, nb, 0) < 0)
-    {
-        _sndlock = 0;
-        return ERROR;
-    }
-    _sndlock = 0;
+    pthread_mutex_lock(&_sndlock);
+    ret = send(fd, buff, strlen(buff), 0);
+    pthread_mutex_unlock(&_sndlock);
 
-    return SUCCESS;
+    return ret;
 }
+
+
+
+
+
+
+
+
 
 int tcp_recv(char *buffer)
 {
