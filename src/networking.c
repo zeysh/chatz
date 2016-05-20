@@ -22,6 +22,7 @@
 #include "../include/chatz.h"
 #include "../include/networking.h"
 
+/* TODO -- Something, somewhere needs to call pthread_mutex_init and pthread_mutex_destroy on this thing */
 static pthread_mutex_t _sndlock;
 
 int sock_open(const char *host, int port)
