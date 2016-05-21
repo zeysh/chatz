@@ -28,8 +28,6 @@ static sqlite3 *_db;
 
 void init_database(char *path)
 {
-    int status;
-
     if (sqlite3_open(path, &_db) != SUCCESS)
     {
         log_event(LOGFILE, "failed to initialize database");

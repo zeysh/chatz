@@ -23,6 +23,11 @@
 #include "../include/app.h"
 #include "../include/database.h"
 
+#define DARKBLUE  0x252839
+#define DARKGREY  0x677077
+#define LIGHTGREY 0xb5b5b7
+#define GOLDENROD 0xf2b632
+
 enum
 {
   LIST_ITEM = 0,
@@ -46,7 +51,8 @@ static void chatz_init(struct _ChatzApp *app)
     int dbexists = 0;
     FILE *fp;
 
-    if (fp = fopen(DBFILE, "r"))
+    fp = fopen(DBFILE, "r");
+    if (fp)
     {
         dbexists = 1;
         fclose(fp);
@@ -75,7 +81,6 @@ void init_list(GtkWidget *list, const char *title)
     gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(store));
     g_object_unref(store);
 }
-
 void populate_channel_list(GtkWidget *list, const gchar *str)
 {
     GtkListStore *store;
@@ -86,61 +91,118 @@ void populate_channel_list(GtkWidget *list, const gchar *str)
     gtk_list_store_set(store, &iter, LIST_ITEM, str, -1);
 }
 
-static void chatz_activate(GApplication *app)
+static void init_channel_list(GApplication *app, GtkWidget *grid)
 {
-    ChatzWindow *win;
-    GtkWidget *grid;
-    GtkWidget *sendbtn;
-    GtkWidget *entry;
-    GtkWidget *view;
+    GtkWidget *list;
     GtkTreeSelection *selection;
 
-    /* create window */
-    win = chatz_window_new(CHATZ_APP(app));
+    list = gtk_tree_view_new();
+    gtk_widget_set_vexpand(list, TRUE);
+    gtk_grid_attach(GTK_GRID(grid), list, 0, 1, 8, 8);
+    init_list(list, "Channels");
+    populate_channel_list(list, "TEST");
+    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
+}
+
+static void init_dm_list(GApplication *app, GtkWidget *grid)
+{
+    GtkWidget *list;
+
+    list = gtk_tree_view_new();
+    gtk_widget_set_hexpand(list, TRUE);
+    gtk_widget_set_vexpand(list, TRUE);
+    gtk_grid_attach(GTK_GRID(grid), list, 0, 9, 8, 5);
+    init_list(list, "Direct Messages");
+}
+
+static void init_window(ChatzWindow *win)
+{
     gtk_container_set_border_width(GTK_CONTAINER(win), 10);
     gtk_window_set_title(GTK_WINDOW(win), "Chatz");
     gtk_window_set_default_size(GTK_WINDOW(win), 800, 600);
     gtk_window_set_position(GTK_WINDOW(win), GTK_WIN_POS_CENTER);
+    g_signal_connect(
+        GTK_WIDGET(win),
+        "destroy",
+        G_CALLBACK(gtk_main_quit),
+        NULL
+    );
+}
 
-    /* create grid for sending messages */
-    grid = gtk_grid_new();
+static void init_grid(GtkWidget *grid, ChatzWindow *win)
+{
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
     gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
     gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
     gtk_container_add(GTK_CONTAINER(win), grid);
+}
 
-    /* create channel viewer and list store */
-    view = gtk_tree_view_new();
-    gtk_widget_set_vexpand(view, TRUE);
-    gtk_grid_attach(GTK_GRID(grid), view, 0, 1, 8, 8);
-    init_list(view, "Channels");
-    populate_channel_list(view, "TEST");
-    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
-
-    /* create friend viewer */
-    view = gtk_tree_view_new();
-    gtk_widget_set_hexpand(view, TRUE);
-    gtk_widget_set_vexpand(view, TRUE);
-    gtk_grid_attach(GTK_GRID(grid), view, 0, 9, 8, 5);
-    init_list(view, "Direct Messages");
-
-    /* create message viewer */
+static void init_chan_msg_viewer(GtkWidget * grid)
+{
+    GtkWidget *view;
     view = gtk_text_view_new();
     gtk_widget_set_vexpand(view, TRUE);
     gtk_grid_attach(GTK_GRID(grid), view, 9, 1, 24, 12);
+}
 
-    /* create send button */
-    sendbtn = gtk_button_new_with_label("Send");
-    gtk_widget_set_tooltip_text(sendbtn, "Send a message");
-    gtk_grid_attach(GTK_GRID(grid), sendbtn, 9, 13, 1, 1);
+static void init_send_btn(GtkWidget *grid)
+{
+    GtkWidget *btn;
+    btn = gtk_button_new_with_label("Send");
+    gtk_widget_set_tooltip_text(btn, "Send a message");
+    gtk_grid_attach(GTK_GRID(grid), btn, 9, 13, 1, 1);
+}
 
-    /* create message/entry box */
+static void init_msg_entry(GtkWidget *grid)
+{
+    GtkWidget *entry;
+
     entry = gtk_entry_new();
     gtk_widget_set_hexpand(entry, TRUE);
-    /* HORIZ SLOT, VERT SLOT, HORIZ CELL,  VERT CELL */
     gtk_grid_attach(GTK_GRID(grid), entry, 10, 13, 23, 1);
+}
+
+static void chatz_activate(GApplication *app)
+{
+    ChatzWindow *win;
+    GtkWidget *grid;
+    GtkCssProvider *provider;
+    GdkDisplay *display;
+    GdkScreen *screen;
+
+    win= gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+    provider = gtk_css_provider_new();
+    display = gdk_display_get_default();
+    screen = gdk_display_get_default_screen(display);
+
+    gtk_style_context_add_provider_for_screen(
+        screen,
+        GTK_STYLE_PROVIDER(provider),
+        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+    );
+
+    gtk_css_provider_load_from_data(
+        GTK_CSS_PROVIDER(provider),
+        "GtkWindow {\n"
+        "   -GtkWidget-focus-line-width: 0;\n"
+        "   background-color: #677077;\n"
+        "}\n", -1, NULL
+    );
+
+    init_window(win);
+    grid = gtk_grid_new();
+    init_grid(grid, win);
+    init_channel_list(app, grid);
+    init_dm_list(app, grid);
+    init_chan_msg_viewer(grid);
+    init_send_btn(grid);
+    init_msg_entry(grid);
+
+     g_object_unref (provider);
 
     gtk_widget_show_all(GTK_WIDGET(win));
+    gtk_main();
 }
 
 static void chatz_open(GApplication *app, GFile **files,
