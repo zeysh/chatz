@@ -22,7 +22,7 @@
 #include "../include/chatz.h"
 #include "../include/database.h"
 #include "../include/log.h"
-#include "../include/servers.h"
+#include "../include/channels.h"
 
 static sqlite3 *_db;
 
@@ -172,14 +172,15 @@ int query_users(void)
     return SUCCESS;
 }
 
-int query_servers(void)
+int query_server_by_sid(int sid, struct ircserver *serv)
 {
     char *sql;
     const char *ptr;
     sqlite3_stmt *stmt;
-    int rc, i = 0;
+    int rc;
 
-    sql = "SELECT * FROM servers";
+    sql = (char *)calloc(MAXSQLLEN, sizeof(char));
+    snprintf(sql, MAXSQLLEN, "SELECT * FROM servers WHERE sid='%i'", sid);
     rc = sqlite3_prepare_v2(_db, sql, -1, &stmt, 0);
     if (rc != SQLITE_OK)
     {
@@ -194,21 +195,52 @@ int query_servers(void)
         return ERROR;
     }
 
-    _nservs  = sqlite3_column_int(stmt, 0);
-    _servers = (struct ircserver *)malloc(sizeof(struct ircserver) * _nservs);
+    if (rc == SQLITE_ROW)
+    {
+        strncpy(serv->host, (const char *)sqlite3_column_text(stmt, 1), PARAMLEN - 1);
+        serv->port = (int)sqlite3_column_int(stmt, 2);
+        ptr        = (const char *)sqlite3_column_text(stmt, 3);
+        if (ptr != NULL)
+            strncpy(_servers->passwd, ptr, PARAMLEN - 1);
+        serv->ssl = (int)sqlite3_column_int(stmt, 4);
+    }
 
-    /*  iterate rows and set irc servers */
+    free(sql);
+    return SUCCESS;
+}
+
+int query_channels(void)
+{
+    char *sql;
+    sqlite3_stmt *stmt;
+    int rc;
+    struct ircchannel *curr;
+
+    sql = "SELECT * FROM channels";
+    rc = sqlite3_prepare_v2(_db, sql, -1, &stmt, 0);
+    if (rc != SQLITE_OK)
+    {
+        log_event(LOGFILE, "Failed to retrieve server listing from database");
+        return ERROR;
+    }
+
+    rc = sqlite3_step(stmt);
+    if (rc == SQLITE_ERROR)
+    {
+        log_event(LOGFILE, "Error retrieving servers from database");
+        return ERROR;
+    }
+
     do
     {
         if (rc == SQLITE_ROW)
         {
-            _servers[i].sid = (int)sqlite3_column_int(stmt, 0);
-            strncpy(_servers[i].host, (const char *)sqlite3_column_text(stmt, 1), PARAMLEN - 1);
-            _servers[i].port = (int)sqlite3_column_int(stmt, 2);
-            ptr = (const char *)sqlite3_column_text(stmt, 3);
-            if (ptr != NULL)
-                strncpy(_servers[i].passwd, ptr, PARAMLEN - 1);
-            _servers[i].ssl = (int)sqlite3_column_int(stmt, 4);
+            curr = (struct ircchannel *)malloc(sizeof(struct ircchannel));
+            curr->sid = (int)sqlite3_column_int(stmt, 1);
+            strncpy(curr->channel, (const char *)sqlite3_column_text(stmt, 2), MAXCHANLEN - 1);
+            query_server_by_sid(curr->sid, &curr->serv);
+            curr->next = _channels;
+            _channels  = curr;
         }
 
         rc = sqlite3_step(stmt);

@@ -22,6 +22,7 @@
 #include "../include/chatz.h"
 #include "../include/app.h"
 #include "../include/database.h"
+#include "../include/channels.h"
 
 #define DARKBLUE  0x252839
 #define DARKGREY  0x677077
@@ -62,7 +63,7 @@ static void chatz_init(struct _ChatzApp *app)
     if (!dbexists)
         create_tables();
 
-    query_servers();
+    query_channels();
 }
 
 void init_list(GtkWidget *list, const char *title)
@@ -81,7 +82,7 @@ void init_list(GtkWidget *list, const char *title)
     gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(store));
     g_object_unref(store);
 }
-void populate_channel_list(GtkWidget *list, const gchar *str)
+void push_channel(GtkWidget *list, const gchar *str)
 {
     GtkListStore *store;
     GtkTreeIter iter;
@@ -95,12 +96,19 @@ static void init_channel_list(GApplication *app, GtkWidget *grid)
 {
     GtkWidget *list;
     GtkTreeSelection *selection;
+    struct ircchannel *curr;
 
     list = gtk_tree_view_new();
     gtk_widget_set_vexpand(list, TRUE);
     gtk_grid_attach(GTK_GRID(grid), list, 0, 1, 8, 8);
     init_list(list, "Channels");
-    populate_channel_list(list, "TEST");
+    curr = _channels;
+    while (curr)
+    {
+        push_channel(list, curr->channel);
+        curr = curr->next;
+    }
+
     selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
 }
 
