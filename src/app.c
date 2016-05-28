@@ -82,6 +82,7 @@ void init_list(GtkWidget *list, const char *title)
     gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(store));
     g_object_unref(store);
 }
+
 void push_channel(GtkWidget *list, const gchar *str)
 {
     GtkListStore *store;
@@ -99,6 +100,7 @@ static void init_channel_list(GApplication *app, GtkWidget *grid)
     struct ircchannel *curr;
 
     list = gtk_tree_view_new();
+    gtk_widget_set_name(GTK_WIDGET(list), "chanlist");
     gtk_widget_set_vexpand(list, TRUE);
     gtk_grid_attach(GTK_GRID(grid), list, 0, 1, 8, 8);
     init_list(list, "Channels");
@@ -117,6 +119,7 @@ static void init_dm_list(GApplication *app, GtkWidget *grid)
     GtkWidget *list;
 
     list = gtk_tree_view_new();
+    gtk_widget_set_name(GTK_WIDGET(list), "dmlist");
     gtk_widget_set_hexpand(list, TRUE);
     gtk_widget_set_vexpand(list, TRUE);
     gtk_grid_attach(GTK_GRID(grid), list, 0, 9, 8, 5);
@@ -149,6 +152,7 @@ static void init_chan_msg_viewer(GtkWidget * grid)
 {
     GtkWidget *view;
     view = gtk_text_view_new();
+    gtk_widget_set_name(GTK_WIDGET(view), "msgview");
     gtk_widget_set_vexpand(view, TRUE);
     gtk_grid_attach(GTK_GRID(grid), view, 9, 1, 24, 12);
 }
@@ -157,6 +161,7 @@ static void init_send_btn(GtkWidget *grid)
 {
     GtkWidget *btn;
     btn = gtk_button_new_with_label("Send");
+    gtk_widget_set_name(GTK_WIDGET(btn), "sendbtn");
     gtk_widget_set_tooltip_text(btn, "Send a message");
     gtk_grid_attach(GTK_GRID(grid), btn, 9, 13, 1, 1);
 }
@@ -170,20 +175,8 @@ static void init_msg_entry(GtkWidget *grid)
     gtk_grid_attach(GTK_GRID(grid), entry, 10, 13, 23, 1);
 }
 
-static void chatz_activate(GApplication *app)
+static void init_css(GtkCssProvider *provider, GdkScreen *screen)
 {
-    ChatzWindow *win;
-    GtkWidget *grid;
-    GtkCssProvider *provider;
-    GdkDisplay *display;
-    GdkScreen *screen;
-
-    win= gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-    provider = gtk_css_provider_new();
-    display = gdk_display_get_default();
-    screen = gdk_display_get_default_screen(display);
-
     gtk_style_context_add_provider_for_screen(
         screen,
         GTK_STYLE_PROVIDER(provider),
@@ -193,11 +186,29 @@ static void chatz_activate(GApplication *app)
     gtk_css_provider_load_from_data(
         GTK_CSS_PROVIDER(provider),
         "GtkWindow {\n"
-        "   -GtkWidget-focus-line-width: 0;\n"
-        "   background-color: #677077;\n"
+        "  background-color: #677077;\n"
+        "}\n"
+        "#sendbtn {\n"
+        "   background-color: #252839;\n"
+        "   color: white;\n"
         "}\n", -1, NULL
     );
+}
 
+static void chatz_activate(GApplication *app)
+{
+    ChatzWindow *win;
+    GtkWidget *grid;
+    GtkCssProvider *provider;
+    GdkDisplay *display;
+    GdkScreen *screen;
+
+    win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    provider = gtk_css_provider_new();
+    display = gdk_display_get_default();
+    screen = gdk_display_get_default_screen(display);
+
+    init_css(provider, screen);
     init_window(win);
     grid = gtk_grid_new();
     init_grid(grid, win);
@@ -207,8 +218,7 @@ static void chatz_activate(GApplication *app)
     init_send_btn(grid);
     init_msg_entry(grid);
 
-     g_object_unref (provider);
-
+    g_object_unref (provider);
     gtk_widget_show_all(GTK_WIDGET(win));
     gtk_main();
 }
@@ -225,8 +235,6 @@ static void chatz_open(GApplication *app, GFile **files,
         win = CHATZ_WINDOW(windows->data);
     else
         win = chatz_window_new(CHATZ_APP(app));
-
-    /* open tabs for channels */
 
     gtk_window_present(GTK_WINDOW(win));
 }
