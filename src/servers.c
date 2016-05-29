@@ -21,7 +21,7 @@
 
 #include "../include/chatz.h"
 #include "../include/servers.h"
-#include "../include/database.h"
+#include "../include/networking.h"
 
 void destroy_servers(void)
 {
@@ -29,17 +29,17 @@ void destroy_servers(void)
     _servers = NULL;
 }
 
-int create_server(struct ircserver *newinfo)
+int connect_server(struct ircserver *serv)
 {
-    return SUCCESS;
-}
+    int status;
 
-int update_server(int sid, struct ircserver *newinfo)
-{
-    return SUCCESS;
-}
+    status = setup_sock(serv->host, serv->port);
+    if (status == ERROR)
+        return ERROR;
 
-int delete_server(int sid)
-{
+    status = tcp_connect();
+    if (status == ERROR)
+        return ERROR;
+
     return SUCCESS;
 }

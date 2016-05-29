@@ -24,8 +24,28 @@
 
 void destroy_channels(void)
 {
+    /* TODO add logic to iterate linked list and free structs */
     free(_channels);
     _channels = NULL;
+}
+
+void channel_connect_by_name(const char *chan)
+{
+    struct ircchannel *curr;
+    int status;
+
+    curr = _channels;
+    while (curr)
+    {
+        if (strncmp(curr->channel, chan, MAXCHANLEN) == 0)
+        {
+            status = connect_server(&curr->serv);
+            if (status == SUCCESS)
+                curr->serv.is_connected = 1;
+            break;
+        }
+        curr = curr->next;
+    }
 }
 
 int create_channel(struct ircchannel *newinfo)

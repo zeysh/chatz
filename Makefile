@@ -7,6 +7,7 @@ GTKFLAGS=`pkg-config --cflags --libs gtk+-3.0`
 SRC = src/main.c \
       src/networking.c \
       src/servers.c \
+      src/channels.c \
       src/database.c \
       src/log.c \
 	  src/app.c

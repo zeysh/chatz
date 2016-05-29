@@ -18,5 +18,7 @@ ChatzApp *chatz_new (void);
 GType chatz_window_get_type (void);
 ChatzWindow *chatz_window_new (ChatzApp *app);
 void chatz_window_open (ChatzWindow *win, GFile *file);
+void view_channel_list_row_activated (GtkTreeView *treeview, GtkTreePath *path,
+                                      GtkTreeViewColumn *column, gpointer userdata);
 
 #endif

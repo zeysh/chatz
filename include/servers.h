@@ -10,12 +10,11 @@ struct ircserver
     int port;
     char passwd[PARAMLEN];
     int ssl;
+    int is_connected;
 };
 
 void destroy_servers (void);
-int create_server (struct ircserver *newinfo);
-int update_server (int sid, struct ircserver *newinfo);
-int delete_server (int sid);
+int connect_server (struct ircserver *serv);
 
 int _nservs;
 struct ircserver *_servers;

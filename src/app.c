@@ -31,7 +31,7 @@
 
 enum
 {
-  LIST_ITEM = 0,
+  COLUMN_NAME,
   N_COLUMNS
 };
 
@@ -74,7 +74,7 @@ void init_list(GtkWidget *list, const char *title)
 
     renderer = gtk_cell_renderer_text_new();
     column = gtk_tree_view_column_new_with_attributes(title,
-            renderer, "text", LIST_ITEM, NULL);
+            renderer, "text", COLUMN_NAME, NULL);
 
     gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
     store = gtk_list_store_new(N_COLUMNS, G_TYPE_STRING);
@@ -90,7 +90,24 @@ void push_channel(GtkWidget *list, const gchar *str)
 
     store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(list)));
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, LIST_ITEM, str, -1);
+    gtk_list_store_set(store, &iter, COLUMN_NAME, str, -1);
+}
+
+/* channel double clicked */
+void view_channel_list_row_activated(GtkTreeView *treeview, GtkTreePath *path,
+                                     GtkTreeViewColumn *column, gpointer userdata)
+{
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    gchar *name;
+
+    model = gtk_tree_view_get_model(treeview);
+    if (gtk_tree_model_get_iter(model, &iter, path))
+    {
+        gtk_tree_model_get(model, &iter, COLUMN_NAME, &name, -1);
+        channel_connect_by_name(name);
+        g_free(name);
+    }
 }
 
 static void init_channel_list(GApplication *app, GtkWidget *grid)
@@ -100,6 +117,7 @@ static void init_channel_list(GApplication *app, GtkWidget *grid)
     struct ircchannel *curr;
 
     list = gtk_tree_view_new();
+    g_signal_connect(list, "row-activated", (GCallback)view_channel_list_row_activated, NULL);
     gtk_widget_set_name(GTK_WIDGET(list), "chanlist");
     gtk_widget_set_vexpand(list, TRUE);
     gtk_grid_attach(GTK_GRID(grid), list, 0, 1, 8, 8);

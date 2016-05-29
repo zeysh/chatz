@@ -19,5 +19,6 @@ void destroy_channels (void);
 int create_channel (struct ircchannel *newinfo);
 int update_channel(int sid, struct ircchannel *newinfo);
 int delete_channel (int sid);
+void channel_connect_by_name(const char *chan);
 
 #endif
