@@ -24,34 +24,34 @@
 
 static int _sndlock;
 
-int setup_sock(const char *host, int port)
+int setup_sock(const char *host, int port, struct sockaddr_in *sin)
 {
-    _sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (_sock < 0)
-        return ERROR;
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0)
+        return sock;
 
-    _sin.sin_addr.s_addr = inet_addr(host);
-    _sin.sin_family      = AF_INET;
-    _sin.sin_port        = htons(port);
+    sin->sin_addr.s_addr = inet_addr(host);
+    sin->sin_family      = AF_INET;
+    sin->sin_port        = htons(port);
+
+    return sock;
+}
+
+int tcp_connect(int sock, struct sockaddr_in *sin)
+{
+    if (connect(sock, (struct sockaddr *)sin, sizeof(struct sockaddr_in)) < 0)
+        return ERROR;
 
     return SUCCESS;
 }
 
-int tcp_connect(void)
-{
-    if (connect(_sock, (struct sockaddr *)&_sin, sizeof(_sin)) < 0)
-        return ERROR;
-
-    return SUCCESS;
-}
-
-int tcp_send(const char *msg, size_t nb)
+int tcp_send(int sock, const char *msg, size_t nb)
 {
     while (_sndlock == 1)
         sleep(1);
 
     _sndlock = 1;
-    if (send(_sock, msg, nb, 0) < 0)
+    if (send(sock, msg, nb, 0) < 0)
     {
         _sndlock = 0;
         return ERROR;
@@ -61,11 +61,11 @@ int tcp_send(const char *msg, size_t nb)
     return SUCCESS;
 }
 
-int tcp_recv(char *buffer)
+int tcp_recv(int sock, char *buffer)
 {
     int nb;
 
-    if ((nb = read(_sock, buffer, BUFLEN - 1)) > 0)
+    if ((nb = read(sock, buffer, BUFLEN - 1)) > 0)
         buffer[nb] = '\0';
 
     return nb;
