@@ -11,7 +11,7 @@
 #define ERROR   1
 #define SUCCESS 0
 
-#define BUFLEN 4096
+#define BUFFSIZE 4096
 
 #define LOGFILE "chatz.log"
 #define DBFILE "chatz.db"

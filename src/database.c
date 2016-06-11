@@ -41,7 +41,7 @@ static int insert_chatz_serv(void)
     int rc;
 
     sql = "INSERT INTO servers (host, port, ssl) " \
-          "VALUES ('74.140.209.140', 6697, 0);";
+          "VALUES ('185.30.166.38', 6667, 0);";
 
     rc = sqlite3_exec(_db, sql, NULL, 0, &errmsg);
     if (rc != SQLITE_OK)

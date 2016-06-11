@@ -65,7 +65,7 @@ int tcp_recv(int sock, char *buffer)
 {
     int nb;
 
-    if ((nb = read(sock, buffer, BUFLEN - 1)) > 0)
+    if ((nb = read(sock, buffer, BUFFSIZE - 1)) > 0)
         buffer[nb] = '\0';
 
     return nb;

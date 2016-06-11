@@ -15,6 +15,7 @@ struct ircserver
     struct ircserver *next;
     int sock;
     struct sockaddr_in sin;
+    char *rbuf;
 };
 
 struct ircserver *_servers;

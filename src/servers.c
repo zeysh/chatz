@@ -83,5 +83,7 @@ int connect_server(struct ircserver *serv)
     if (status == ERROR)
         return ERROR;
 
+    serv->rbuf = (char *)calloc(BUFFSIZE, sizeof(char));
+
     return SUCCESS;
 }
