@@ -24,10 +24,13 @@
 #include "../include/database.h"
 #include "../include/channels.h"
 
-#define DARKBLUE  0x252839
-#define DARKGREY  0x677077
-#define LIGHTGREY 0xb5b5b7
-#define GOLDENROD 0xf2b632
+/* CSS COLOR PALETTE
+DARKBLUE "#181b24"
+MEDBLUE  "#27383e"
+MAROON   "#460b0b"
+GOLD     "#cb861a"
+YELLOW   "#ffdb84"
+*/
 
 enum
 {
@@ -175,22 +178,14 @@ static void init_chan_msg_viewer(GtkWidget * grid)
     gtk_grid_attach(GTK_GRID(grid), view, 9, 1, 24, 12);
 }
 
-static void init_send_btn(GtkWidget *grid)
-{
-    GtkWidget *btn;
-    btn = gtk_button_new_with_label("Send");
-    gtk_widget_set_name(GTK_WIDGET(btn), "sendbtn");
-    gtk_widget_set_tooltip_text(btn, "Send a message");
-    gtk_grid_attach(GTK_GRID(grid), btn, 9, 13, 1, 1);
-}
-
 static void init_msg_entry(GtkWidget *grid)
 {
     GtkWidget *entry;
 
     entry = gtk_entry_new();
+    gtk_widget_set_name(GTK_WIDGET(entry), "msgentry");
     gtk_widget_set_hexpand(entry, TRUE);
-    gtk_grid_attach(GTK_GRID(grid), entry, 10, 13, 23, 1);
+    gtk_grid_attach(GTK_GRID(grid), entry, 9, 13, 24, 1);
 }
 
 static void init_css(GtkCssProvider *provider, GdkScreen *screen)
@@ -204,11 +199,19 @@ static void init_css(GtkCssProvider *provider, GdkScreen *screen)
     gtk_css_provider_load_from_data(
         GTK_CSS_PROVIDER(provider),
         "GtkWindow {\n"
-        "  background-color: #677077;\n"
+        "  background-color: #27383e;\n"
         "}\n"
-        "#sendbtn {\n"
-        "   background-color: #252839;\n"
-        "   color: white;\n"
+        "#msgview {\n"
+        "  background-color: #181b24;\n"
+        "  color: white;\n"
+        "}\n"
+        "#chanlist {\n"
+        "  background-color: #181b24;\n"
+        "  color: white;\n"
+        "}\n"
+        "#dmlist {\n"
+        "  background-color: #181b24;\n"
+        "  color: white;\n"
         "}\n", -1, NULL
     );
 }
@@ -233,7 +236,6 @@ static void chatz_activate(GApplication *app)
     init_channel_list(app, grid);
     init_dm_list(app, grid);
     init_chan_msg_viewer(grid);
-    init_send_btn(grid);
     init_msg_entry(grid);
 
     g_object_unref (provider);
